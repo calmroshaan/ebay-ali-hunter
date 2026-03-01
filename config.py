@@ -13,7 +13,7 @@ MAX_EBAY_PAGES = 2            # How many eBay result pages to scrape per keyword
 MAX_ALI_RESULTS = 30          # How many AliExpress results to collect per keyword
 
 # --- Fuzzy Matching ---
-SIMILARITY_THRESHOLD = 60     # 0-100. Higher = stricter title matching
+SIMILARITY_THRESHOLD = 40     # 0-100. Higher = stricter title matching
 
 # --- Delays (in seconds): (average, variation) ---
 # Gaussian = more human-like than plain random

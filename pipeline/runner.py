@@ -106,8 +106,17 @@ async def run_pipeline(browser_manager, keywords: list[str], log_callback=None) 
 
                 keyword_results.append(record)
 
-            log(f"✅ '{keyword}': {len(keyword_results)} profitable matches found")
-            all_results.extend(keyword_results)
+            keyword_results.sort(
+                key=lambda x: (
+                    x.get("sold_count") or 0,
+                    x.get("margin_pct") or 0
+                ),
+                reverse=True
+            )
+            top5 = keyword_results[:5]
+
+            log(f"✅ '{keyword}': {len(keyword_results)} matches found — keeping top {len(top5)}")
+            all_results.extend(top5)
 
         except Exception as e:
             log(f"❌ Pipeline error for '{keyword}': {e}")

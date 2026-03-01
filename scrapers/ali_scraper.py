@@ -144,14 +144,65 @@ async def _extract_item(item) -> dict | None:
             return None
         if len(title) < 15:
             return None
+        
+        clean_url = _fix_ali_url(href)
+        if not clean_url:
+            return None
 
         return {
             "ali_title": title,
             "ali_price": price,
             "ali_shipping": 0.0,
-            "ali_url"     : href,
+            "ali_url"     : clean_url,
         }
 
     except Exception as e:
         logger.debug(f"Google result extraction failed: {e}")
+        return None
+    
+def _fix_ali_url(href: str) -> str | None:
+    """
+    Cleans up AliExpress URLs from Google results.
+    - Removes Google redirect wrappers
+    - Keeps only valid item pages
+    - Filters known dead/region-locked patterns
+    - Adds language=en to avoid blank pages
+    """
+    try:
+        # Unwrap Google redirect if present
+        if "/url?" in href:
+            from urllib.parse import urlparse, parse_qs
+            parsed = parse_qs(urlparse(href).query)
+            href   = parsed.get("q", [href])[0]
+
+        # Must be AliExpress
+        if "aliexpress.com" not in href:
+            return None
+
+        # Must be a product page
+        if "/item/" not in href:
+            return None
+
+        # Skip known dead patterns
+        dead_patterns = [
+            "/item/1005",   # often region locked
+            "wholesale",
+            "russian",
+            "aliexpress.ru",
+        ]
+        for pattern in dead_patterns:
+            if pattern in href.lower():
+                return None
+
+        # Extract clean item URL
+        base = href.split("?")[0]
+
+        # Must end with numeric item ID
+        import re
+        if not re.search(r"/item/\d+\.html$", base):
+            return None
+
+        return base + "?language=en&ship_to=US"
+
+    except Exception:
         return None
