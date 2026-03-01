@@ -165,7 +165,6 @@ def _fix_ali_url(href: str) -> str | None:
     Cleans up AliExpress URLs from Google results.
     - Removes Google redirect wrappers
     - Keeps only valid item pages
-    - Filters known dead/region-locked patterns
     - Adds language=en to avoid blank pages
     """
     try:
@@ -179,29 +178,12 @@ def _fix_ali_url(href: str) -> str | None:
         if "aliexpress.com" not in href:
             return None
 
-        # Must be a product page
+        # Must be a product page not search or category
         if "/item/" not in href:
             return None
 
-        # Skip known dead patterns
-        dead_patterns = [
-            "/item/1005",   # often region locked
-            "wholesale",
-            "russian",
-            "aliexpress.ru",
-        ]
-        for pattern in dead_patterns:
-            if pattern in href.lower():
-                return None
-
-        # Extract clean item URL
+        # Strip query params and add our own
         base = href.split("?")[0]
-
-        # Must end with numeric item ID
-        import re
-        if not re.search(r"/item/\d+\.html$", base):
-            return None
-
         return base + "?language=en&ship_to=US"
 
     except Exception:
