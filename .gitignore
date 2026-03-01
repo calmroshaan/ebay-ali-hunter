@@ -37,3 +37,5 @@ desktop.ini
 .DS_Store
 
 .env
+
+data/keywords.txt
