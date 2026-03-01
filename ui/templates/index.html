@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eBay Ali Hunter</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="app">
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <h1>🔍 eBay Ali Hunter</h1>
+            <span class="subtitle">Dropshipping Opportunity Finder</span>
+        </div>
+        <div class="header-right">
+            <div class="status-badge" id="statusBadge">
+                <span class="dot idle"></span>
+                <span id="statusText">Idle</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="main">
+
+        <!-- LEFT PANEL: Keywords + Controls -->
+        <div class="panel left-panel">
+
+            <div class="panel-header">
+                <h2>Keywords</h2>
+                <button class="btn btn-small btn-secondary" onclick="addKeyword()">+ Add</button>
+            </div>
+
+            <div class="keywords-list" id="keywordsList">
+                <!-- Populated by JS -->
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-start" id="startBtn" onclick="startScraper()">
+                    ▶ Start Scraper
+                </button>
+                <button class="btn btn-stop" id="stopBtn" onclick="stopScraper()" disabled>
+                    ■ Stop
+                </button>
+            </div>
+
+            <div class="stats-box" id="statsBox" style="display:none;">
+                <div class="stat">
+                    <span class="stat-label">Products Found</span>
+                    <span class="stat-value" id="statCount">0</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- MIDDLE PANEL: Live Logs -->
+        <div class="panel middle-panel">
+            <div class="panel-header">
+                <h2>Live Logs</h2>
+                <button class="btn btn-small btn-secondary" onclick="clearLogs()">Clear</button>
+            </div>
+            <div class="log-box" id="logBox">
+                <div class="log-placeholder">Logs will appear here when scraper runs...</div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: Results Table -->
+        <div class="panel right-panel">
+            <div class="panel-header">
+                <h2>Results</h2>
+                <button class="btn btn-small btn-success" id="downloadBtn"
+                        onclick="downloadExcel()" style="display:none;">
+                    ⬇ Download Excel
+                </button>
+            </div>
+            <div class="results-wrapper">
+                <table class="results-table" id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th>Keyword</th>
+                            <th>eBay Title</th>
+                            <th>eBay $</th>
+                            <th>Ali $</th>
+                            <th>Profit $</th>
+                            <th>Margin %</th>
+                            <th>Welcome Deal</th>
+                            <th>eBay Link</th>
+                            <th>Ali Link</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                        <tr>
+                            <td colspan="9" class="empty-msg">
+                                Results will appear here after scraping...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="/static/script.js"></script>
+</body>
+</html>

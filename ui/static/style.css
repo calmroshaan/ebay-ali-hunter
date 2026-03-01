@@ -1,0 +1,363 @@
+/* style.css — eBay Ali Hunter UI */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0f1117;
+    color: #e0e0e0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* -----------------------------------------------
+   HEADER
+----------------------------------------------- */
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px;
+    background: #1a1d27;
+    border-bottom: 1px solid #2a2d3e;
+    flex-shrink: 0;
+}
+
+.header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+.subtitle {
+    font-size: 12px;
+    color: #6b7280;
+    margin-left: 10px;
+}
+
+.status-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #252836;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.dot.idle    { background: #6b7280; }
+.dot.running { background: #10b981; animation: pulse 1.2s infinite; }
+.dot.done    { background: #3b82f6; }
+.dot.error   { background: #ef4444; }
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+}
+
+/* -----------------------------------------------
+   MAIN LAYOUT
+----------------------------------------------- */
+
+.main {
+    display: flex;
+    flex: 1;
+    gap: 0;
+    overflow: hidden;
+}
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #2a2d3e;
+    overflow: hidden;
+}
+
+.left-panel   { width: 240px; flex-shrink: 0; background: #1a1d27; }
+.middle-panel { width: 340px; flex-shrink: 0; background: #13151f; }
+.right-panel  { flex: 1; background: #0f1117; border-right: none; }
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid #2a2d3e;
+    flex-shrink: 0;
+}
+
+.panel-header h2 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+/* -----------------------------------------------
+   KEYWORDS
+----------------------------------------------- */
+
+.keywords-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.keyword-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #252836;
+    border-radius: 6px;
+    padding: 6px 8px;
+    border: 1px solid #2a2d3e;
+}
+
+.keyword-item input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #e0e0e0;
+    font-size: 13px;
+}
+
+.keyword-item .del-btn {
+    background: none;
+    border: none;
+    color: #4b5563;
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1;
+    padding: 0 2px;
+}
+
+.keyword-item .del-btn:hover { color: #ef4444; }
+
+/* -----------------------------------------------
+   CONTROLS
+----------------------------------------------- */
+
+.controls {
+    padding: 12px;
+    display: flex;
+    gap: 8px;
+    border-top: 1px solid #2a2d3e;
+}
+
+.btn {
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.btn-start {
+    flex: 1;
+    padding: 10px;
+    background: #10b981;
+    color: white;
+}
+
+.btn-start:hover:not(:disabled) { background: #059669; }
+
+.btn-stop {
+    padding: 10px 14px;
+    background: #ef4444;
+    color: white;
+}
+
+.btn-stop:hover:not(:disabled) { background: #dc2626; }
+
+.btn-small {
+    padding: 4px 10px;
+    font-size: 12px;
+}
+
+.btn-secondary {
+    background: #252836;
+    color: #9ca3af;
+    border: 1px solid #2a2d3e;
+}
+
+.btn-secondary:hover { background: #2e3147; color: #e0e0e0; }
+
+.btn-success {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-success:hover { background: #2563eb; }
+
+/* -----------------------------------------------
+   STATS BOX
+----------------------------------------------- */
+
+.stats-box {
+    padding: 12px;
+    border-top: 1px solid #2a2d3e;
+}
+
+.stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #10b981;
+}
+
+/* -----------------------------------------------
+   LOGS
+----------------------------------------------- */
+
+.log-box {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.log-placeholder {
+    color: #4b5563;
+    font-style: italic;
+    margin-top: 10px;
+}
+
+.log-line { color: #d1d5db; }
+.log-line.success { color: #10b981; }
+.log-line.error   { color: #ef4444; }
+.log-line.warning { color: #f59e0b; }
+.log-line.info    { color: #60a5fa; }
+
+/* -----------------------------------------------
+   RESULTS TABLE
+----------------------------------------------- */
+
+.results-wrapper {
+    flex: 1;
+    overflow: auto;
+    padding: 0;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.results-table thead th {
+    background: #1a1d27;
+    color: #9ca3af;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid #2a2d3e;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.results-table tbody tr {
+    border-bottom: 1px solid #1e2130;
+    transition: background 0.15s;
+}
+
+.results-table tbody tr:hover { background: #1a1d27; }
+
+.results-table tbody td {
+    padding: 8px 12px;
+    color: #d1d5db;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.results-table tbody tr.high-margin td:first-child {
+    border-left: 3px solid #10b981;
+}
+
+.results-table tbody tr.welcome-deal td:first-child {
+    border-left: 3px solid #3b82f6;
+}
+
+.results-table a {
+    color: #60a5fa;
+    text-decoration: none;
+}
+
+.results-table a:hover { text-decoration: underline; }
+
+.empty-msg {
+    color: #4b5563;
+    font-style: italic;
+    text-align: center;
+    padding: 30px !important;
+}
+
+.badge-yes {
+    background: #1d4ed8;
+    color: #bfdbfe;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.badge-no {
+    color: #4b5563;
+    font-size: 11px;
+}
+
+/* -----------------------------------------------
+   SCROLLBARS
+----------------------------------------------- */
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a2d3e; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3d4e; }
