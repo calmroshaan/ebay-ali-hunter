@@ -20,10 +20,10 @@ from utils.logger import get_logger
 logger = get_logger(__name__)
 
 
-async def run_pipeline(browser_manager, keywords: list[str], log_callback=None) -> list[dict]:
+async def run_pipeline(browser_manager, keywords: list[str], log_callback=None, market: str = "US") -> list[dict]:
     """
     Main pipeline loop.
-    Takes the browser manager and list of keywords.
+    Takes the browser manager, list of keywords and market (US or UK).
     log_callback — optional function to send live logs to UI.
     Returns list of all profitable matched products.
     """
@@ -35,19 +35,20 @@ async def run_pipeline(browser_manager, keywords: list[str], log_callback=None) 
             log_callback(msg)
 
     all_results = []
+    all_ebay_top = []
 
     for i, keyword in enumerate(keywords):
         log(f"--- Keyword {i+1}/{len(keywords)}: '{keyword}' ---")
 
         try:
             # --- Step 1: Scrape eBay ---
-            log(f"🔎 Scraping eBay for '{keyword}'...")
+            log(f"🔎 Scraping eBay [{market}] for '{keyword}'...")
             ebay_context  = await browser_manager.new_context("ebay")
-            ebay_products = await scrape_ebay(ebay_context, keyword)
+            ebay_products = await scrape_ebay(ebay_context, keyword, market=market)
             await browser_manager.save_state(ebay_context, "ebay")
             await ebay_context.close()
 
-            log(f"✅ eBay: {len(ebay_products)} products found")
+            log(f"✅ eBay [{market}]: {len(ebay_products)} products found") 
 
             if not ebay_products:
                 log(f"⚠️ No eBay results for '{keyword}' — skipping")
@@ -69,6 +70,28 @@ async def run_pipeline(browser_manager, keywords: list[str], log_callback=None) 
             if not ali_products:
                 log(f"⚠️ No AliExpress results for '{keyword}' — skipping")
                 continue
+# --- Collect eBay Top 5 Sellers regardless of matching ---
+            ebay_top5 = sorted(
+                ebay_products,
+                key=lambda x: x.get("sold_count") or 0,
+                reverse=True
+            )[:5]
+
+            for ebay_item in ebay_top5:
+                ebay_record = {
+                    "keyword"       : keyword,
+                    "market"        : ebay_item.get("market", "US"),
+                    "currency"      : ebay_item.get("currency", "USD"),
+                    "symbol"        : ebay_item.get("symbol", "$"),
+                    "title"         : ebay_item["title"],
+                    "ebay_price"    : ebay_item["ebay_price"],
+                    "ebay_shipping" : ebay_item["ebay_shipping"],
+                    "ebay_url"      : ebay_item.get("ebay_url", ""),
+                    "sold_count"    : ebay_item.get("sold_count"),
+                    "seller_rating" : ebay_item.get("seller_rating"),
+                    "welcome_deal"  : ebay_item.get("welcome_deal", False),
+                }
+                all_ebay_top.append(ebay_record)
 
             # --- Step 3 & 4: Match + Profit ---
             keyword_results = []
@@ -89,6 +112,9 @@ async def run_pipeline(browser_manager, keywords: list[str], log_callback=None) 
 
                 record = {
                     "keyword"       : keyword,
+                    "market"        : ebay_item.get("market", "US"),
+                    "currency"      : ebay_item.get("currency", "USD"),
+                    "symbol"        : ebay_item.get("symbol", "$"),
                     "title"         : ebay_item["title"],
                     "ebay_price"    : ebay_item["ebay_price"],
                     "ebay_shipping" : ebay_item["ebay_shipping"],
@@ -106,6 +132,7 @@ async def run_pipeline(browser_manager, keywords: list[str], log_callback=None) 
 
                 keyword_results.append(record)
 
+            # Sort by sold count first, then margin as tiebreaker
             keyword_results.sort(
                 key=lambda x: (
                     x.get("sold_count") or 0,
@@ -113,6 +140,8 @@ async def run_pipeline(browser_manager, keywords: list[str], log_callback=None) 
                 ),
                 reverse=True
             )
+
+            # Keep only top 5 per keyword
             top5 = keyword_results[:5]
 
             log(f"✅ '{keyword}': {len(keyword_results)} matches found — keeping top {len(top5)}")
@@ -128,4 +157,5 @@ async def run_pipeline(browser_manager, keywords: list[str], log_callback=None) 
             await human_delay(*BETWEEN_KEYWORDS_DELAY, label="between_keywords")
 
     log(f"🏁 Pipeline complete. Total profitable products: {len(all_results)}")
-    return all_results
+    log(f"🏁 Total eBay top sellers collected: {len(all_ebay_top)}")
+    return all_results, all_ebay_top

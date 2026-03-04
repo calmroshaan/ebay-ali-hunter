@@ -37,5 +37,18 @@ OUTPUT_DIR    = "data/results/"
 PROFILES_DIR  = "data/profiles/"
 
 # --- Site URLs ---
-EBAY_BASE_URL = "https://www.ebay.com/sch/i.html"
-ALI_BASE_URL  = "https://www.google.com/search"
+# --- Site URLs ---
+EBAY_MARKETS = {
+    "US": {
+        "url"      : "https://www.ebay.com/sch/i.html",
+        "currency" : "USD",
+        "symbol"   : "$",
+    },
+    "UK": {
+        "url"      : "https://www.ebay.co.uk/sch/i.html",
+        "currency" : "GBP",
+        "symbol"   : "£",
+    },
+}
+ALI_BASE_URL    = "https://www.google.com/search"
+DEFAULT_MARKET  = "US"

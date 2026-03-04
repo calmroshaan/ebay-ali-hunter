@@ -1,6 +1,7 @@
 // script.js — eBay Ali Hunter UI Logic
 
 let eventSource = null;
+let selectedMarket = "US";
 
 // -----------------------------------------------
 // INIT — load keywords when page opens
@@ -16,10 +17,14 @@ document.addEventListener("DOMContentLoaded", () => {
 // KEYWORDS
 // -----------------------------------------------
 
-async function loadKeywords() {
-    const res  = await fetch("/api/keywords");
-    const data = await res.json();
-    renderKeywords(data.keywords);
+function selectMarket(market) {
+    selectedMarket = market;
+
+    // Update button styles
+    document.getElementById("btnUS").classList.toggle("active", market === "US");
+    document.getElementById("btnUK").classList.toggle("active", market === "UK");
+
+    appendLog(`🌍 Market switched to: ${market}`, "info");
 }
 
 function renderKeywords(keywords) {
@@ -83,7 +88,11 @@ async function saveKeywords() {
 async function startScraper() {
     await saveKeywords();
 
-    const res  = await fetch("/api/start", { method: "POST" });
+    const res  = await fetch("/api/start", {
+        method : "POST",
+        headers: { "Content-Type": "application/json" },
+        body   : JSON.stringify({ market: selectedMarket }),
+    });
     const data = await res.json();
 
     if (data.status === "already_running") {

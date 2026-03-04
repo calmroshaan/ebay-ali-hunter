@@ -34,6 +34,16 @@
                 <button class="btn btn-small btn-secondary" onclick="addKeyword()">+ Add</button>
             </div>
 
+            <!-- Market Selector -->
+            <div class="market-selector">
+                <span class="market-label">Market:</span>
+                <button class="market-btn active" id="btnUS" onclick="selectMarket('US')">
+                    🇺🇸 US
+                </button>
+                <button class="market-btn" id="btnUK" onclick="selectMarket('UK')">
+                    🇬🇧 UK
+                </button>
+            </div>
             <div class="keywords-list" id="keywordsList">
                 <!-- Populated by JS -->
             </div>

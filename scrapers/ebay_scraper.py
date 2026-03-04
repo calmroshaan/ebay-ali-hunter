@@ -9,7 +9,7 @@ import re
 from urllib.parse import urlencode
 from playwright.async_api import BrowserContext, Page
 from playwright_stealth import stealth_async
-from config import EBAY_BASE_URL, MAX_EBAY_PAGES, PAGE_LOAD_DELAY, BETWEEN_ITEMS_DELAY
+from config import EBAY_MARKETS, MAX_EBAY_PAGES, PAGE_LOAD_DELAY, BETWEEN_ITEMS_DELAY
 from utils.logger import get_logger
 from utils.delays import human_delay
 
@@ -41,15 +41,21 @@ def _parse_sold(raw: str) -> int | None:
         return None
 
 
-async def scrape_ebay(context: BrowserContext, keyword: str) -> list[dict]:
+async def scrape_ebay(context: BrowserContext, keyword: str, market: str = "US") -> list[dict]:
     """
-    Main function. Takes a browser context and keyword.
+    Main function. Takes a browser context, keyword and market (US or UK).
     Returns list of product dicts found on eBay.
     """
     results = []
     page: Page = await context.new_page()
     await stealth_async(page)
     await page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+
+    # Get market settings
+    market_config = EBAY_MARKETS.get(market, EBAY_MARKETS["US"])
+    ebay_url      = market_config["url"]
+    currency      = market_config["currency"]
+    symbol        = market_config["symbol"]
 
     try:
         for page_num in range(1, MAX_EBAY_PAGES + 1):
@@ -58,8 +64,8 @@ async def scrape_ebay(context: BrowserContext, keyword: str) -> list[dict]:
                 "_nkw": keyword,
                 "_pgn": page_num,
             }
-            url = f"{EBAY_BASE_URL}?{urlencode(params)}"
-            logger.info(f"eBay | keyword='{keyword}' | page={page_num}")
+            url = f"{ebay_url}?{urlencode(params)}"
+            logger.info(f"eBay [{market}] | keyword='{keyword}' | page={page_num}")
 
             # Go to the page
             await page.goto(url, wait_until="domcontentloaded", timeout=30000)
@@ -79,7 +85,7 @@ async def scrape_ebay(context: BrowserContext, keyword: str) -> list[dict]:
             # Extract data from each listing
             for item in items:
                 await human_delay(*BETWEEN_ITEMS_DELAY, label="ebay_item")
-                record = await _extract_item(item)
+                record = await _extract_item(item, market=market, currency=currency, symbol=symbol)
                 if record:
                     results.append(record)
 
@@ -104,12 +110,17 @@ async def _is_blocked(page: Page) -> bool:
         return False
 
 
-async def _extract_item(item) -> dict | None:
+async def _extract_item(item, market: str = "US", currency: str = "USD", symbol: str = "$") -> dict | None:
     """
     Extract all fields from one eBay listing element.
     Returns None if the listing is invalid or missing key data.
     """
     try:
+        # Check for Welcome Deal badge
+        welcome_deal = False
+        all_text = (await item.inner_text()).lower()
+        if "welcome deal" in all_text:
+            welcome_deal = True
         # Title
         title_el = await item.query_selector("div.s-card__title span.su-styled-text")
         title = (await title_el.inner_text()).strip() if title_el else None
@@ -164,14 +175,17 @@ async def _extract_item(item) -> dict | None:
             return None
 
         return {
-            "title": title,
-            "ebay_price": price,
-            "ebay_shipping": shipping,
-            "sold_count": sold_count,
-            "seller_rating": seller_rating,
-            "ebay_url": url,
+            "title"         : title,
+            "ebay_price"    : price,
+            "ebay_shipping" : shipping,
+            "sold_count"    : sold_count,
+            "seller_rating" : seller_rating,
+            "ebay_url"      : url,
+            "welcome_deal"  : welcome_deal,
+            "market"        : market,
+            "currency"      : currency,
+            "symbol"        : symbol,
         }
-
     except Exception as e:
         logger.debug(f"Item extraction failed: {e}")
         return None

@@ -59,13 +59,9 @@ async def main():
 
     try:
         # --- Run pipeline ---
-        results = await run_pipeline(browser, keywords)
-
-        # --- Deduplicate ---
+        results, ebay_top = await run_pipeline(browser, keywords)
         results = deduplicate(results)
-
-        # --- Export to CSV ---
-        output_path = export_results(results)
+        output_path = export_results(results, ebay_top)
 
         if output_path:
             print(f"\n✅ Done! Results saved to: {output_path}")

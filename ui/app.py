@@ -32,6 +32,7 @@ scraper_running  = False
 scraper_logs     = []
 scraper_results  = []
 latest_excel     = None
+selected_market  = "US"
 
 
 # -----------------------------------------------
@@ -62,10 +63,14 @@ def save_keywords():
 @app.route("/api/start", methods=["POST"])
 def start_scraper():
     """Start the scraper in a background thread."""
-    global scraper_running, scraper_logs, scraper_results, latest_excel
+    global scraper_running, scraper_logs, scraper_results, latest_excel, selected_market
 
     if scraper_running:
         return jsonify({"status": "already_running"})
+
+    # Get market from request
+    data           = request.get_json() or {}
+    selected_market = data.get("market", "US")
 
     scraper_running = True
     scraper_logs    = []
@@ -75,7 +80,7 @@ def start_scraper():
     thread = threading.Thread(target=_run_scraper_thread, daemon=True)
     thread.start()
 
-    return jsonify({"status": "started"})
+    return jsonify({"status": "started", "market": selected_market})
 
 
 @app.route("/api/stop", methods=["POST"])
@@ -151,7 +156,7 @@ def _run_scraper_thread():
 
 async def _run_pipeline_async():
     """Actual async pipeline — same as main.py but logs to UI."""
-    global scraper_results, latest_excel
+    global scraper_results, latest_excel, selected_market
 
     keywords = _load_keywords()
     if not keywords:
@@ -166,12 +171,13 @@ async def _run_pipeline_async():
     scraper_logs.append("✅ Browser launched")
 
     try:
-        results = await run_pipeline(browser, keywords, log_callback=scraper_logs.append)
+        results, ebay_top = await run_pipeline(browser, keywords, log_callback=scraper_logs.append, market=selected_market)
         results = deduplicate(results)
 
         scraper_logs.append(f"✅ Found {len(results)} profitable products")
+        scraper_logs.append(f"✅ Collected {len(ebay_top)} eBay top sellers")
 
-        path = export_results(results)
+        path = export_results(results, ebay_top)
         if path:
             scraper_logs.append(f"✅ Excel saved: {path}")
             latest_excel = path
